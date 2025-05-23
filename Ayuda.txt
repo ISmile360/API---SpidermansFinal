@@ -1,0 +1,26 @@
+Registrar usuario : 
+{
+    "nombre": "",
+    "usuario": "",
+    "email": "",
+    "password": "",
+    "rol": 1 o 2 
+}
+
+Iniciar sesion : 
+{
+ 
+  "email":"admin@mail.com",
+  "password":"Slayer360"
+  
+}
+
+db.usuarios.updateOne(
+  { _id: "681a234a429d253dc39642e7" },
+  { $set: { estado: "activo" } }
+)
+
+db.villanos.updateMany(
+    {}, 
+    { $set: { imagen: "" } } 
+);

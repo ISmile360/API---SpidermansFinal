@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"nombre_villano":{"$numberInt":"1"}},"name":"nombre_villano_1","background":true,"unique":true}],"uuid":"e74065ce2f97482c8e11b588f740cd26","collectionName":"villanos","type":"collection"}
