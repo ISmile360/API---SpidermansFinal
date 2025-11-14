@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
-import usuariosRouter from './routes/Web.js'; // Router de usuarios
+import https from 'https';
+import fs from 'fs';
+import usuariosRouter from './routes/Web.js'; 
 import aliadosRouter from './routes/Aliados.js'
 import spidermansRouter from './routes/spidermans.js';
 import villanosRouter from './routes/villanos.js';
@@ -8,21 +10,39 @@ import Conexion from './config/Conexion.js';
 
 
 const app = express();
+const PUERTO = process.env.PUERTO || 3016;
+const allowedOrigins = [
+  'https://noveno.codeseiryu.com.mx',
+  'https://novenosis.xyz',
+  'http://localhost:3000',
+  'http://localhost:8081'
+];
+const corsOptions = {
+  origin:(origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log(' CORS bloqueado para:', origin);
+      callback(new Error('CORS no permitido para este origen'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization','autorizacion'],
+  optionsSuccessStatus: 200
+};
 
-
-app.use(express.urlencoded({ extended: true }));
-
-
-// Middlewares
-app.use(express.json()); 
-app.use(cors());
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+app.use(express.json());
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Conexión a la base de datos
 Conexion();
 
 // Routers (con prefijos)
 app.use("/api/test",express.static("uploads/aliados"))
-app.use('/api/usuarios', usuariosRouter); // Todas las rutas de usuarios empezarán con /api/usuarios
+app.use('/api/usuarios', usuariosRouter); 
 app.use('/api/aliados', aliadosRouter);
 app.use('/api/spidermans', spidermansRouter);
 app.use('/api/villanos', villanosRouter);
@@ -40,7 +60,7 @@ app.get('/', (req, res) => {
     });
 });
 
-// Manejo de rutas no encontradas (404)
+
 app.use((req, res) => {
     res.status(404).json({
         estatus: "error",
@@ -73,14 +93,11 @@ app.use((req, res) => {
     });
 });
 
-// Configuración del puerto
-const PUERTO = process.env.PORT || 3000;
-app.listen(PUERTO, () => {
-    console.log(`El servidor está corriendo`);
-    console.log(`URL: http://localhost:${PUERTO}`);
-    console.log('\nEndpoints disponibles:');
-    console.log(`- Usuarios: http://localhost:${PUERTO}/api/usuarios`);
-    console.log(`- Aliados: http://localhost:${PUERTO}/api/aliados`);
-    console.log(`- Spidermans: http://localhost:${PUERTO}/api/spidermans`);
-    console.log(`- Villanos: http://localhost:${PUERTO}/api/villanos`);
+ const options = {
+  key: fs.readFileSync('/etc/letsencrypt/live/novenosis.xyz/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/novenosis.xyz/fullchain.pem')
+};
+
+https.createServer(options, app).listen(PUERTO, () => {
+  console.log(`Servidor HTTPS corriendo en puerto ${PUERTO}`);
 });
